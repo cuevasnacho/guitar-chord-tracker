@@ -4,7 +4,8 @@ import time
 
 
 class HandDetector():
-    def __init__(self, mode=False, max_hands=2, detection_con=0.7, track_con=0.5):
+    def __init__(self, mode=False, max_hands=2,
+                 detection_con=0.7, track_con=0.5):
         self.mode = mode
         self.max_hands = max_hands
         self.detection_con = detection_con
@@ -12,7 +13,7 @@ class HandDetector():
 
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(self.mode, self.max_hands, 1,
-                                        self.detection_con, self.track_con)
+                                         self.detection_con, self.track_con)
         self.mpDraw = mp.solutions.drawing_utils
 
     def find_hands(self, img, draw=True):
