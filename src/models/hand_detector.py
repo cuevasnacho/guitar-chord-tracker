@@ -1,11 +1,10 @@
 import cv2
 import mediapipe as mp
-import time
 
 
 class HandDetector():
     def __init__(self, mode=False, max_hands=2,
-                 detection_con=0.7, track_con=0.5):
+                 detection_con=0.5, track_con=0.5):
         self.mode = mode
         self.max_hands = max_hands
         self.detection_con = detection_con
@@ -21,17 +20,17 @@ class HandDetector():
         self.results = self.hands.process(imgRGB)
 
         if self.results.multi_hand_landmarks:
-            for handLms in self.results.multi_hand_landmarks:
+            for hand_lms in self.results.multi_hand_landmarks:
                 if draw:
-                    self.mpDraw.draw_landmarks(img, handLms,
+                    self.mpDraw.draw_landmarks(img, hand_lms,
                                                self.mp_hands.HAND_CONNECTIONS)
         return img
 
     def find_position(self, img, hand_no=0, draw=True):
         lm_list = []
         if self.results.multi_hand_landmarks:
-            myHand = self.results.multi_hand_landmarks[hand_no]
-            for id, lm in enumerate(myHand.landmark):
+            my_hand = self.results.multi_hand_landmarks[hand_no]
+            for id, lm in enumerate(my_hand.landmark):
                 h, w, c = img.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 lm_list.append([id, cx, cy])
