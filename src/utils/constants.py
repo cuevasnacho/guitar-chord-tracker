@@ -1,0 +1,27 @@
+# Fingers
+THUMB = 4
+INDEX_PIP = 6
+INDEX = 8
+MIDDLE = 12
+RING = 16
+PINKY = 20
+
+TIP_IDS = [
+    THUMB,
+    INDEX,
+    MIDDLE,
+    RING,
+    PINKY
+]
+
+MUSIC_HAND_IDS = [
+    INDEX_PIP,
+    INDEX,
+    MIDDLE,
+    RING,
+    PINKY
+]
+
+# Config
+SCREEN_WIDTH = 640
+SCREEN_HEIGHT = 480

@@ -1,22 +1,20 @@
 import cv2
 import time
 import models.hand_detector as htm
-from utils import euclidean_distance, print_screen
-
-SCREEN_WIDTH = 640
-SCREEN_HEIGHT = 480
+from utils.misc import euclidean_distance, print_screen
+from utils.constants import TIP_IDS, SCREEN_WIDTH, SCREEN_HEIGHT, MUSIC_HAND_IDS
 
 
 def fingers_counter(img, lm_list):
     fingers = []
 
-    if lm_list[tip_ids[0]][1] > lm_list[tip_ids[0] - 1][1]:
+    if lm_list[TIP_IDS[0]][1] > lm_list[TIP_IDS[0] - 1][1]:
         fingers.append(1)
     else:
         fingers.append(0)
 
     for id in range(1, 5):
-        if lm_list[tip_ids[id]][2] < lm_list[tip_ids[id] - 2][2]:
+        if lm_list[TIP_IDS[id]][2] < lm_list[TIP_IDS[id] - 2][2]:
             fingers.append(1)
         else:
             fingers.append(0)
@@ -30,8 +28,8 @@ def fingers_counter(img, lm_list):
 
 
 def thumb_index_distance(lm_list):
-    thumb = lm_list[tip_ids[0]]
-    index = lm_list[tip_ids[1]]
+    thumb = lm_list[TIP_IDS[0]]
+    index = lm_list[TIP_IDS[1]]
     distance = euclidean_distance(
         thumb[1], thumb[2],
         index[1], index[2]
@@ -59,28 +57,30 @@ def capture_init():
     return cap
 
 
+def show_fps(img, ptime):
+    ctime = time.time()
+    fps = 1 / (ctime - ptime)
+    ptime = ctime
+
+    cv2.putText(img, f'FPS: {int(fps)}', (400, 70), cv2.FONT_HERSHEY_PLAIN,
+                3, (255, 0, 0), 3)
+    return ptime
+
+
 if __name__ == '__main__':
     cap = capture_init()
     ptime = 0
 
-    detector = htm.HandDetector(detection_con=0.75)
-
-    tip_ids = [4, 8, 12, 16, 20]
+    detector = htm.HandDetector(detection_con=0.5)
 
     while cap.isOpened():
         success, img = cap.read()
         img = detector.find_hands(img)
-        lm_list = detector.find_position(img, draw=False)
+        lm_list = detector.find_position(img, draw=False, tip_ids=MUSIC_HAND_IDS)
+        ptime = show_fps(img, ptime)
 
-        if len(lm_list) != 0:
-            finger_potentiometer(img, lm_list)
-
-        ctime = time.time()
-        fps = 1 / (ctime - ptime)
-        ptime = ctime
-
-        cv2.putText(img, f'FPS: {int(fps)}', (400, 70), cv2.FONT_HERSHEY_PLAIN,
-                    3, (255, 0, 0), 3)
+        if lm_list:
+            ptime = show_fps(img, ptime)
 
         cv2.imshow("Image", img)
         cv2.waitKey(1)
