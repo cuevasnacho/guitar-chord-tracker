@@ -2,7 +2,8 @@ import cv2
 import time
 import models.hand_detector as htm
 from utils.misc import euclidean_distance, print_screen
-from utils.constants import TIP_IDS, SCREEN_WIDTH, SCREEN_HEIGHT, MUSIC_HAND_IDS
+from utils.constants import (TIP_IDS, SCREEN_WIDTH,
+                             SCREEN_HEIGHT, MUSIC_HAND_IDS)
 
 
 def fingers_counter(img, lm_list):
@@ -76,7 +77,11 @@ if __name__ == '__main__':
     while cap.isOpened():
         success, img = cap.read()
         img = detector.find_hands(img)
-        lm_list = detector.find_position(img, draw=False, tip_ids=MUSIC_HAND_IDS)
+        lm_list = detector.find_position(
+            img,
+            draw=False,
+            tip_ids=MUSIC_HAND_IDS
+        )
         ptime = show_fps(img, ptime)
 
         if lm_list:
