@@ -21,12 +21,12 @@ def normalize_data(data):
     return data_array
 
 
-def compute_distance_features(normalized_landmarks):
-    num_landmarks = len(normalized_landmarks)
+def compute_distance_features(data):
+    num_landmarks = len(data)
     distance_features = []
     for i in range(num_landmarks):
         for j in range(i + 1, num_landmarks):
-            dist = np.linalg.norm(normalized_landmarks[i] - normalized_landmarks[j])
+            dist = np.linalg.norm(data[i] - data[j])
             distance_features.append(dist)
     return distance_features
 

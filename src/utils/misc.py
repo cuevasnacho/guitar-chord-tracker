@@ -9,7 +9,7 @@ Functions:
 - print_screen(img, text, org=(0, 0), font=cv2.FONT_HERSHEY_PLAIN,
                scale=2, color=(255, 0, 0), thickness=2): Print text on an image
 - normalize_data(data): Normalize data between 0 and 1
-- compute_distance_features(normalized_landmarks): Calculates distance features
+- compute_distance_features(data): Calculates distance features
                                                    between points
 
 
@@ -54,21 +54,21 @@ def normalize_data(data):
     return data_array
 
 
-def compute_distance_features(normalized_landmarks):
+def compute_distance_features(data):
     """
     Calculates distance features between points
 
     Args:
-        normalized_landmarks ([[float]]): Input data
+        data ([[float]]): Input data
 
     Returns:
         [float]: Featured distance data
     """
-    num_landmarks = len(normalized_landmarks)
+    num_landmarks = len(data)
     distance_features = []
     for i in range(num_landmarks):
         for j in range(i + 1, num_landmarks):
-            dist = np.linalg.norm(normalized_landmarks[i] - normalized_landmarks[j])
+            dist = np.linalg.norm(data[i] - data[j])
             distance_features.append(dist)
     return np.array(distance_features)
 

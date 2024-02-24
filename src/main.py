@@ -2,12 +2,15 @@ import numpy as np
 import cv2
 import time
 import models.hand_detector as htm
-from utils.misc import (compute_distance_features, normalize_data, print_screen)
+from utils.misc import (compute_distance_features,
+                        normalize_data,
+                        print_screen)
 from utils.constants import (SCREEN_WIDTH, SCREEN_HEIGHT,
                              MUSIC_HAND_IDS, CHORDS_DATA, CHORDS)
 
 
 THRESHOLD = 60
+
 
 def capture_init():
     cap = cv2.VideoCapture(0)
@@ -40,16 +43,16 @@ def initialize_chords_data(data):
     return featured_data
 
 
-def nearest_neighbor_matching_live(live_features, patterns_features, patterns_labels):
+def nearest_neighbor_matching_live(live_data, patterns, labels):
     min_distance = float('inf')
     best_match = None
-    
-    for pattern_label, pattern_features in zip(patterns_labels, patterns_features):
-        distance = np.linalg.norm(live_features - pattern_features)
+
+    for label, pattern in zip(labels, patterns):
+        distance = np.linalg.norm(live_data - pattern)
         if distance < min_distance:
             min_distance = distance
-            best_match = pattern_label
-            
+            best_match = label
+
     return best_match, min_distance
 
 
@@ -78,7 +81,8 @@ if __name__ == '__main__':
                 CHORDS
             )
             if distance < THRESHOLD:
-                print_screen(img, match, org=(40, 50), scale=4, color=(0, 255, 0), thickness=3)
+                print_screen(img, match, org=(40, 50),
+                             scale=4, color=(0, 255, 0), thickness=3)
 
         cv2.imshow("Guitar Chord Tracker", img)
         cv2.waitKey(1)

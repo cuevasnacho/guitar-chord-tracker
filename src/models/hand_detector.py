@@ -21,7 +21,7 @@ class HandDetector():
         Hand Detector initializer
 
         Args:
-            mode (bool): 
+            mode (bool):
             max_hands (int): number of hand to be detected
             detection_con (float): detection confidence level
             track_con (float): track confidence level
@@ -56,13 +56,14 @@ class HandDetector():
                                                self.mp_hands.HAND_CONNECTIONS)
         return img
 
-    def find_position(self, img, hand_no=0, draw=True, tip_ids=[], show_id=True):
+    def find_position(self, img, hand_no=0, draw=True,
+                      tip_ids=[], show_id=True):
         """
         Find hand spots coordinates
 
         Args:
             img (numpy.ndarray): Input image
-            hand_no (int): 
+            hand_no (int):
             draw (bool): Draw hand articulations
             tip_ids ([int]): Ids to be tracked
             show_id (bool): Append tip id
