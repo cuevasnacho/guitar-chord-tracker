@@ -1,55 +1,13 @@
+import numpy as np
 import cv2
 import time
 import models.hand_detector as htm
-from utils.misc import euclidean_distance, print_screen
-from utils.constants import (TIP_IDS, SCREEN_WIDTH,
-                             SCREEN_HEIGHT, MUSIC_HAND_IDS)
+from utils.misc import (compute_distance_features, normalize_data, print_screen)
+from utils.constants import (SCREEN_WIDTH, SCREEN_HEIGHT,
+                             MUSIC_HAND_IDS, CHORDS_DATA, CHORDS)
 
 
-def fingers_counter(img, lm_list):
-    fingers = []
-
-    if lm_list[TIP_IDS[0]][1] > lm_list[TIP_IDS[0] - 1][1]:
-        fingers.append(1)
-    else:
-        fingers.append(0)
-
-    for id in range(1, 5):
-        if lm_list[TIP_IDS[id]][2] < lm_list[TIP_IDS[id] - 2][2]:
-            fingers.append(1)
-        else:
-            fingers.append(0)
-
-    total_fingers = fingers.count(1)
-    print(total_fingers)
-
-    cv2.rectangle(img, (20, 225), (170, 425), (0, 255, 0), cv2.FILLED)
-    print_screen(img, str(total_fingers),
-                 org=(45, 375), thickness=25, scale=10)
-
-
-def thumb_index_distance(lm_list):
-    thumb = lm_list[TIP_IDS[0]]
-    index = lm_list[TIP_IDS[1]]
-    distance = euclidean_distance(
-        thumb[1], thumb[2],
-        index[1], index[2]
-    )
-    return distance
-
-
-def finger_potentiometer(img, lm_list):
-    distance = thumb_index_distance(lm_list)
-    if distance < 30:
-        percentage = 0.00
-    elif distance > 230:
-        percentage = 100.00
-    else:
-        percentage = round((distance - 30)/2, 2)
-    bar_width = int((percentage/100)*SCREEN_WIDTH)
-    cv2.rectangle(img, (0, 0), (bar_width, 20), (0, 255, 0), cv2.FILLED)
-    print_screen(img, text=percentage, org=(45, 375))
-
+THRESHOLD = 60
 
 def capture_init():
     cap = cv2.VideoCapture(0)
@@ -68,11 +26,39 @@ def show_fps(img, ptime):
     return ptime
 
 
+def process_chords(data):
+    normalized_data = normalize_data(data)
+    return compute_distance_features(normalized_data)
+
+
+def initialize_chords_data(data):
+    featured_data = []
+    for chord in data:
+        featured_data.append(
+            process_chords(chord)
+        )
+    return featured_data
+
+
+def nearest_neighbor_matching_live(live_features, patterns_features, patterns_labels):
+    min_distance = float('inf')
+    best_match = None
+    
+    for pattern_label, pattern_features in zip(patterns_labels, patterns_features):
+        distance = np.linalg.norm(live_features - pattern_features)
+        if distance < min_distance:
+            min_distance = distance
+            best_match = pattern_label
+            
+    return best_match, min_distance
+
+
 if __name__ == '__main__':
     cap = capture_init()
     ptime = 0
 
-    detector = htm.HandDetector(detection_con=0.5)
+    detector = htm.HandDetector(detection_con=0.75)
+    patterns_data = initialize_chords_data(CHORDS_DATA)
 
     while cap.isOpened():
         success, img = cap.read()
@@ -80,14 +66,21 @@ if __name__ == '__main__':
         lm_list = detector.find_position(
             img,
             draw=False,
-            tip_ids=MUSIC_HAND_IDS
+            tip_ids=MUSIC_HAND_IDS,
+            show_id=False
         )
-        ptime = show_fps(img, ptime)
 
         if lm_list:
-            ptime = show_fps(img, ptime)
+            captured_data = process_chords(lm_list)
+            match, distance = nearest_neighbor_matching_live(
+                captured_data,
+                patterns_data,
+                CHORDS
+            )
+            if distance < THRESHOLD:
+                print_screen(img, match, org=(40, 50), scale=4, color=(0, 255, 0), thickness=3)
 
-        cv2.imshow("Image", img)
+        cv2.imshow("Guitar Chord Tracker", img)
         cv2.waitKey(1)
 
     cap.release()
